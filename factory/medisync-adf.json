@@ -1,0 +1,15 @@
+{
+	"name": "medisync-adf",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "8555c11f-ce8f-400d-9420-bb308aae98cd",
+		"tenantId": "e49fe8ca-ab29-4cb7-81a7-33bd79e5aec1"
+	}
+}
