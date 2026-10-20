@@ -1,0 +1,93 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "medisync-adf"
+		},
+		"ls_medisync_adls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://medisync.dfs.core.windows.net/"
+		},
+		"ls_medisync_akv_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://medisync-kv.vault.azure.net/"
+		},
+		"ls_medisync_sqldb_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "medisync.database.windows.net"
+		},
+		"ls_medisync_sqldb_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "medisync"
+		},
+		"ls_medisync_sqldb_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "user"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_medisync_adls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This linked service connects ADF with ADLS.",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_medisync_adls_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_medisync_akv')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This connects medisync akv service.",
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('ls_medisync_akv_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_medisync_sqldb')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This connects medisync sql DB",
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('ls_medisync_sqldb_properties_typeProperties_server')]",
+					"database": "[parameters('ls_medisync_sqldb_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('ls_medisync_sqldb_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_medisync_akv",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "medisyncdbpwd"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_medisync_akv')]"
+			]
+		}
+	]
+}
