@@ -1,0 +1,11 @@
+{
+	"name": "ls_medisync_akv",
+	"properties": {
+		"description": "This connects medisync akv service.",
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://medisync-kv.vault.azure.net/"
+		}
+	}
+}
