@@ -1,0 +1,11 @@
+{
+	"name": "ls_medisync_adls",
+	"properties": {
+		"description": "This linked service connects ADF with ADLS.",
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://medisync.dfs.core.windows.net/"
+		}
+	}
+}
