@@ -21,7 +21,7 @@
 							"value": "SELECT *\nFROM ctrl.table_config\nWHERE is_active = 1\n  AND source_system = '@{pipeline().parameters.src_system}';",
 							"type": "Expression"
 						},
-						"queryTimeout": "02:00:00",
+						"queryTimeout": "00:58:00",
 						"partitionOption": "None"
 					},
 					"dataset": {
