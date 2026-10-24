@@ -1,0 +1,19 @@
+{
+	"name": "ls_medisync_adb",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-7405613872672851.11.azuredatabricks.net",
+			"accessToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_medisync_akv",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "adb-pat"
+			},
+			"existingClusterId": "1021-041135-y2s17a8r"
+		}
+	}
+}
