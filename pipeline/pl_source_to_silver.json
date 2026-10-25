@@ -75,6 +75,10 @@
 									"table_id": {
 										"value": "@item().table_id",
 										"type": "Expression"
+									},
+									"adf_run_id": {
+										"value": "@pipeline().parameters.adf_run_id",
+										"type": "Expression"
 									}
 								}
 							}
@@ -100,7 +104,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},'@{item().stage}','IN-PROGRESS',SYSUTCDATETIME());",
+											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES '(@{pipeline().parameters.adf_run_id}',@{item().table_id},'@{item().stage}','IN-PROGRESS',SYSUTCDATETIME());",
 											"type": "Expression"
 										}
 									}
@@ -154,8 +158,8 @@
 				"defaultValue": "azure_sql"
 			},
 			"adf_run_id": {
-				"type": "int",
-				"defaultValue": 1
+				"type": "string",
+				"defaultValue": "a1"
 			}
 		},
 		"variables": {
