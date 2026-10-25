@@ -1,5 +1,5 @@
 {
-	"name": "pl_source_to_silver_for_each",
+	"name": "pl_source_to_silver_inner",
 	"properties": {
 		"activities": [
 			{
@@ -201,7 +201,7 @@
 				}
 			},
 			{
-				"name": "Updating Current status to Success",
+				"name": "Updating Current status to SUCCESS",
 				"type": "Script",
 				"dependsOn": [
 					{
@@ -228,7 +228,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "UPDATE ctrl.audit_log\nSET status = 'SUCCESS' ,\n    end_time = SYSUTCDATETIME()\n    where adf_run_id = '@{pipeline().parameters.adf_run_id}'\n     and table_id = @{pipeline().parameters.table_id}",
+								"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},@{item().stage},'SUCCESS',utcNow());",
 								"type": "Expression"
 							}
 						}
@@ -239,9 +239,6 @@
 		],
 		"parameters": {
 			"table_id": {
-				"type": "string"
-			},
-			"adf_run_id": {
 				"type": "string"
 			}
 		},

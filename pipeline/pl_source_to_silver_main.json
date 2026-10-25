@@ -1,5 +1,5 @@
 {
-	"name": "pl_source_to_silver",
+	"name": "pl_source_to_silver_main",
 	"properties": {
 		"activities": [
 			{
@@ -67,17 +67,13 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "pl_source_to_silver_for_each",
+									"referenceName": "pl_source_to_silver_inner",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
 								"parameters": {
 									"table_id": {
 										"value": "@item().table_id",
-										"type": "Expression"
-									},
-									"adf_run_id": {
-										"value": "@pipeline().parameters.adf_run_id",
 										"type": "Expression"
 									}
 								}
@@ -104,7 +100,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT into ctrl.audit_log \n(adf_run_id,table_id,stage,status,start_time) \nVALUES \n(\n    '@{pipeline().parameters.adf_run_id}'\n    ,@{item().table_id}\n    ,'@{item().stage}'\n    ,'IN_PROGRESS'\n    ,SYSUTCDATETIME()\n);",
+											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},@{item().stage},'SUCCESS',utcNow());",
 											"type": "Expression"
 										}
 									}
@@ -119,7 +115,7 @@
 								{
 									"activity": "source_to_silver_inner",
 									"dependencyConditions": [
-										"Failed"
+										"Succeeded"
 									]
 								}
 							],
@@ -140,7 +136,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "UPDATE ctrl.audit_log\nSET status = 'FAILED'\n    end_time = SYSUTCDATETIME()\n    where adf_run_id = 1\n     and table_id = @{item().table_id}",
+											"value": "@UPDATE ctrl.audit_log\nSET status = 'FAILED'\n    end_time = utcNow()\n    where adf_run_id = 1\n     and table_id = @{item().table_id}",
 											"type": "Expression"
 										}
 									}
@@ -156,10 +152,6 @@
 			"src_system": {
 				"type": "string",
 				"defaultValue": "azure_sql"
-			},
-			"adf_run_id": {
-				"type": "string",
-				"defaultValue": "a1"
 			}
 		},
 		"variables": {
