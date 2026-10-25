@@ -34,8 +34,6 @@
 			{
 				"name": "ingest_tables",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "read_metadata_sql",
@@ -55,7 +53,14 @@
 						{
 							"name": "source_to_silver_inner",
 							"type": "ExecutePipeline",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Updating Current status to IN-PROGRESS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"secureInput": false
 							},
@@ -72,6 +77,71 @@
 										"type": "Expression"
 									}
 								}
+							}
+						},
+						{
+							"name": "Updating Current status to IN-PROGRESS",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_medisync_sqldb",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},@{item().stage},'SUCCESS',utcNow());",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Updating Current status to Failed",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "source_to_silver_inner",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_medisync_sqldb",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@UPDATE ctrl.audit_log\nSET status = 'FAILED'\n    end_time = utcNow()\n    where adf_run_id = 1\n     and table_id = @{item().table_id}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
 					]

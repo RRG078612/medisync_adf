@@ -199,6 +199,42 @@
 					"referenceName": "ls_medisync_adb",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "Updating Current status to SUCCESS",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "bronze to silver",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_medisync_sqldb",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},@{item().stage},'SUCCESS',utcNow());",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"parameters": {
