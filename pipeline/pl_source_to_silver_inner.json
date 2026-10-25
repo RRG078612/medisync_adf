@@ -127,8 +127,6 @@
 			{
 				"name": "Landing to bronze",
 				"type": "DatabricksNotebook",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "source_to_landing",
@@ -159,6 +157,10 @@
 						"table_name": {
 							"value": "@activity('read_table_metadata').output.firstRow.source_table_name",
 							"type": "Expression"
+						},
+						"source_file_format": {
+							"value": "@coalesce(activity('read_table_metadata').output.firstRow.source_file_format,'')",
+							"type": "Expression"
 						}
 					}
 				},
@@ -170,8 +172,6 @@
 			{
 				"name": "bronze to silver",
 				"type": "DatabricksNotebook",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Landing to bronze",
@@ -197,6 +197,14 @@
 						},
 						"table_name": {
 							"value": "@activity('read_table_metadata').output.firstRow.source_table_name",
+							"type": "Expression"
+						},
+						"merge_keys": {
+							"value": "@coalesce(activity('read_table_metadata').output.firstRow.merge_keys,'')",
+							"type": "Expression"
+						},
+						"load_type": {
+							"value": "@activity('read_table_metadata').output.firstRow.load_type",
 							"type": "Expression"
 						}
 					}
