@@ -136,7 +136,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "@UPDATE ctrl.audit_log\nSET status = 'FAILED'\n    end_time = utcNow()\n    where adf_run_id = 1\n     and table_id = @{item().table_id}",
+											"value": "@concat(\n    'UPDATE ctrl.audit_log SET status = ''FAILED'', end_time = SYSUTCDATETIME() WHERE adf_run_id = ''',\n    pipeline().RunId,\n    ''' AND table_id = ',\n    string(item().table_id),\n    ' AND stage = ''',\n    item().stage,\n    ''' AND status = ''IN_PROGRESS'';'\n)",
 											"type": "Expression"
 										}
 									}
