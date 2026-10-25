@@ -100,7 +100,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},@{item().stage},'SUCCESS',SYSUTCDATETIME());",
+											"value": "INSERT into ctrl.audit_log (adf_run_id,table_id,stage,status,start_time) VALUES (1,@{item().table_id},'@{item().stage}','IN-PROGRESS',SYSUTCDATETIME());",
 											"type": "Expression"
 										}
 									}
