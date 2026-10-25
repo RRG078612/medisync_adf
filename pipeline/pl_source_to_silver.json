@@ -152,6 +152,9 @@
 			"src_system": {
 				"type": "string",
 				"defaultValue": "azure_sql"
+			},
+			"adf_run_id": {
+				"type": "string"
 			}
 		},
 		"variables": {
