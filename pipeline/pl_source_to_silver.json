@@ -115,7 +115,7 @@
 								{
 									"activity": "source_to_silver_inner",
 									"dependencyConditions": [
-										"Succeeded"
+										"Failed"
 									]
 								}
 							],
