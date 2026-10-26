@@ -51,8 +51,6 @@
 			{
 				"name": "source_to_landing",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Check_Load_Type",
