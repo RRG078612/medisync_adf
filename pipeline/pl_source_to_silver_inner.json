@@ -266,6 +266,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"on": {
+						"value": "@activity('Read_Watermark').output.firstRow.source_system\n",
+						"type": "Expression"
+					},
 					"cases": [
 						{
 							"value": "azure_sql",
@@ -353,7 +357,12 @@
 											"type": "BinarySource",
 											"storeSettings": {
 												"type": "AzureBlobFSReadSettings",
-												"recursive": true
+												"recursive": true,
+												"modifiedDatetimeStart": {
+													"value": "@variables('watermark value')",
+													"type": "Expression"
+												},
+												"deleteFilesAfterCompletion": false
 											},
 											"formatSettings": {
 												"type": "BinaryReadSettings"
@@ -373,7 +382,13 @@
 									"inputs": [
 										{
 											"referenceName": "ds_azure_adls_csv",
-											"type": "DatasetReference"
+											"type": "DatasetReference",
+											"parameters": {
+												"directory": {
+													"value": "@activity('read_table_metadata').output.firstRow.source_path",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [

@@ -8,6 +8,9 @@
 		"parameters": {
 			"directory": {
 				"type": "string"
+			},
+			"container": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
