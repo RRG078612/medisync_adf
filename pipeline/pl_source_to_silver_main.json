@@ -34,6 +34,8 @@
 			{
 				"name": "ingest_tables",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "read_metadata_sql",
@@ -151,10 +153,11 @@
 		"parameters": {
 			"src_system": {
 				"type": "string",
-				"defaultValue": "azure_sql"
+				"defaultValue": "adls_csv"
 			},
 			"adf_run_id": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "a3"
 			}
 		},
 		"variables": {

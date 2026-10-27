@@ -349,6 +349,16 @@
 									},
 									"userProperties": [],
 									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
 										"sink": {
 											"type": "ParquetSink",
 											"storeSettings": {
@@ -360,6 +370,15 @@
 										},
 										"enableStaging": false
 									},
+									"inputs": [
+										{
+											"referenceName": "ds_azure_adls_csv",
+											"type": "DatasetReference",
+											"parameters": {
+												"directory": "insurance_providers"
+											}
+										}
+									],
 									"outputs": [
 										{
 											"referenceName": "ds_landing_parquet",
