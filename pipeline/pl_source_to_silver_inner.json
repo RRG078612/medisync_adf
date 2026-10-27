@@ -379,7 +379,8 @@
 												"directory": {
 													"value": "@activity('read_table_metadata').output.firstRow.source_path",
 													"type": "Expression"
-												}
+												},
+												"container": "source"
 											}
 										}
 									],
@@ -388,11 +389,11 @@
 											"referenceName": "ds_azure_adls_csv",
 											"type": "DatasetReference",
 											"parameters": {
-												"container": "landing",
-												"folder": {
+												"directory": {
 													"value": "@concat(\n    activity('read_table_metadata').output.firstRow.source_system,\n    '/',\n    activity('read_table_metadata').output.firstRow.source_table_name,\n    '/',\n    variables('start_time')\n)",
 													"type": "Expression"
-												}
+												},
+												"container": "landing"
 											}
 										}
 									]
