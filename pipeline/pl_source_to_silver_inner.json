@@ -357,12 +357,7 @@
 											"type": "BinarySource",
 											"storeSettings": {
 												"type": "AzureBlobFSReadSettings",
-												"recursive": true,
-												"modifiedDatetimeStart": {
-													"value": "@variables('watermark value')",
-													"type": "Expression"
-												},
-												"deleteFilesAfterCompletion": false
+												"recursive": true
 											},
 											"formatSettings": {
 												"type": "BinaryReadSettings"
@@ -384,8 +379,7 @@
 												"directory": {
 													"value": "@activity('read_table_metadata').output.firstRow.source_path",
 													"type": "Expression"
-												},
-												"container": "source"
+												}
 											}
 										}
 									],
