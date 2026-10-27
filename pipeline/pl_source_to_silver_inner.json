@@ -286,7 +286,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "@concat(\n    'SELECT * FROM dbo.',\n    activity('read_table_metadata').output.firstRow.source_table_name\n)",
+												"value": "select * from PUBLIC.@{activity('read_table_metadata').output.firstRow.source_table_name}\n@{\n    if(equals(activity('read_table_metadata').output.firstRow.load_type,'FULL')\n        , ''\n        , concat(\n            'where ',activity('read_table_metadata').output.firstRow.watermark_column,' > ','''',variables('watermark value'),''''\n        )\n    )\n}",
 												"type": "Expression"
 											},
 											"queryTimeout": "00:10:00",
@@ -373,10 +373,7 @@
 									"inputs": [
 										{
 											"referenceName": "ds_azure_adls_csv",
-											"type": "DatasetReference",
-											"parameters": {
-												"directory": "insurance_providers"
-											}
+											"type": "DatasetReference"
 										}
 									],
 									"outputs": [
@@ -390,6 +387,56 @@
 									]
 								}
 							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Check_Load_Type_2",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "bronze to silver",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(activity('read_table_metadata').output.firstRow.load_type,'FULL'))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Updating Watermark Value",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_medisync_sqldb",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "update ctrl.watermark\nset watermark_value = SYSDATETIME()\nwhere table_id = @{pipeline().parameters.table_id}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
 				}
