@@ -49,79 +49,11 @@
 				}
 			},
 			{
-				"name": "source_to_landing",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Check_Load_Type",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 2,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "@concat(\n    'SELECT * FROM dbo.',\n    activity('read_table_metadata').output.firstRow.source_table_name\n)",
-							"type": "Expression"
-						},
-						"queryTimeout": "00:10:00",
-						"partitionOption": "None"
-					},
-					"sink": {
-						"type": "ParquetSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "ParquetWriteSettings"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "ds_azure_sql_table",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ds_landing_parquet",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "landing",
-							"folder": {
-								"value": "@concat(\n    activity('read_table_metadata').output.firstRow.source_system,\n    '/',\n    activity('read_table_metadata').output.firstRow.source_table_name,\n    '/',\n    variables('start_time')\n)",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
 				"name": "Landing to bronze",
 				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "source_to_landing",
+						"activity": "Switch1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -317,6 +249,128 @@
 									"type": "Expression"
 								}
 							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Switch1",
+				"type": "Switch",
+				"dependsOn": [
+					{
+						"activity": "Check_Load_Type",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"cases": [
+						{
+							"value": "azure_sql",
+							"activities": [
+								{
+									"name": "source_to_landing",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 2,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat(\n    'SELECT * FROM dbo.',\n    activity('read_table_metadata').output.firstRow.source_table_name\n)",
+												"type": "Expression"
+											},
+											"queryTimeout": "00:10:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_azure_sql_table",
+											"type": "DatasetReference"
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_landing_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": "landing",
+												"folder": {
+													"value": "@concat(\n    activity('read_table_metadata').output.firstRow.source_system,\n    '/',\n    activity('read_table_metadata').output.firstRow.source_table_name,\n    '/',\n    variables('start_time')\n)",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						},
+						{
+							"value": "adls_csv",
+							"activities": [
+								{
+									"name": "source to landing csv",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"outputs": [
+										{
+											"referenceName": "ds_landing_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": "landing"
+											}
+										}
+									]
+								}
+							]
 						}
 					]
 				}
