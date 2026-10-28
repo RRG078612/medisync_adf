@@ -22,7 +22,10 @@
 					"value": "@dataset().directory",
 					"type": "Expression"
 				},
-				"fileSystem": "source"
+				"fileSystem": {
+					"value": "@dataset().container",
+					"type": "Expression"
+				}
 			}
 		}
 	}

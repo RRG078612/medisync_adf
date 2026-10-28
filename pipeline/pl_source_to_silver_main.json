@@ -34,8 +34,6 @@
 			{
 				"name": "ingest_tables",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "read_metadata_sql",
