@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT *\nFROM ctrl.table_config\nWHERE is_active = 1\n  AND stage = 'SILVER_TO_GOLD';",
+							"value": "SELECT table_id , gold_table_name\nFROM ctrl.table_config\nWHERE is_active = 1\n  AND stage = 'SILVER_TO_GOLD';",
 							"type": "Expression"
 						},
 						"queryTimeout": "00:58:00",
@@ -34,6 +34,8 @@
 			{
 				"name": "ingest_tables",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "read_metadata_sql",
@@ -50,35 +52,6 @@
 					},
 					"isSequential": false,
 					"activities": [
-						{
-							"name": "source_to_silver_inner",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Updating Current status to IN-PROGRESS",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "pl_source_to_silver_inner",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"table_id": {
-										"value": "@item().table_id",
-										"type": "Expression"
-									}
-								}
-							}
-						},
 						{
 							"name": "Updating Current status to IN-PROGRESS",
 							"type": "Script",
@@ -100,7 +73,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "@concat(\n    'INSERT INTO ctrl.audit_log (adf_run_id, table_id, stage, status, start_time) VALUES (''',\n    pipeline().RunId,\n    ''', ',\n    string(item().table_id),\n    ', ''',\n    item().stage,\n    ''', ''IN_PROGRESS'', SYSUTCDATETIME());'\n)",
+											"value": "@concat(\n    'INSERT INTO ctrl.audit_log (adf_run_id, table_id, stage, status, start_time) VALUES (''',\n    pipeline().RunId,\n    ''', ',\n    string(item().table_id),\n    ', ''SILVER_TO_GOLD'', ''IN_PROGRESS'', SYSUTCDATETIME());'\n)",
 											"type": "Expression"
 										}
 									}
@@ -113,7 +86,7 @@
 							"type": "Script",
 							"dependsOn": [
 								{
-									"activity": "source_to_silver_inner",
+									"activity": "Silver to Gold",
 									"dependencyConditions": [
 										"Failed"
 									]
@@ -137,6 +110,90 @@
 										"type": "Query",
 										"text": {
 											"value": "@concat(\n    'UPDATE ctrl.audit_log SET status = ''FAILED'', end_time = SYSUTCDATETIME() WHERE adf_run_id = ''',\n    pipeline().RunId,\n    ''' AND table_id = ',\n    string(item().table_id),\n    ' AND stage = ''',\n    item().stage,\n    ''' AND status = ''IN_PROGRESS'';'\n)",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Silver to Gold",
+							"type": "DatabricksNotebook",
+							"dependsOn": [
+								{
+									"activity": "Updating Current status to IN-PROGRESS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": {
+									"value": "/medi_sync/medi-sync-adb/Gold/NB_@{item().gold_table_name}",
+									"type": "Expression"
+								},
+								"baseParameters": {
+									"landing_timestamp": {
+										"value": "@variables('start_time')",
+										"type": "Expression"
+									},
+									"source_system": {
+										"value": "@activity('read_table_metadata').output.firstRow.source_system",
+										"type": "Expression"
+									},
+									"table_name": {
+										"value": "@activity('read_table_metadata').output.firstRow.source_table_name",
+										"type": "Expression"
+									},
+									"source_file_format": {
+										"value": "@coalesce(activity('read_table_metadata').output.firstRow.source_file_format,'')",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_medisync_adb",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Updating Current status to SUCCESS",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Silver to Gold",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_medisync_sqldb",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "UPDATE ctrl.audit_log\nSET\n    status = 'SUCCESS',\n    end_time = SYSUTCDATETIME()\n    records_written = @{activity('Silver to Gold').output.runoutput}\nWHERE adf_run_id = '@{pipeline().parameters.adf_run_id}'\n  AND table_id = @{item().table_id}\n  AND stage = 'SOURCE_TO_SILVER'\n  AND status = 'IN_PROGRESS';",
 											"type": "Expression"
 										}
 									}
