@@ -290,7 +290,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "select * from PUBLIC.@{activity('read_table_metadata').output.firstRow.source_table_name}\n@{\n    if(equals(activity('read_table_metadata').output.firstRow.load_type,'FULL')\n        , ''\n        , concat(\n            'where ',activity('read_table_metadata').output.firstRow.watermark_column,' > ','''',variables('watermark value'),''''\n        )\n    )\n}",
+												"value": "select * from dbo.@{activity('read_table_metadata').output.firstRow.source_table_name}\n@{\n    if(equals(activity('read_table_metadata').output.firstRow.load_type,'FULL')\n        , ''\n        , concat(\n            'where ',activity('read_table_metadata').output.firstRow.watermark_column,' > ','''',variables('watermark value'),''''\n        )\n    )\n}",
 												"type": "Expression"
 											},
 											"queryTimeout": "00:10:00",
