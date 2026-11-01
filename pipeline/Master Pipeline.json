@@ -71,12 +71,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pl_source_to_silver_main",
+						"referenceName": "pl_silver_to_gold",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"src_system": "azure_sql",
 						"adf_run_id": {
 							"value": "@pipeline().RunId",
 							"type": "Expression"
