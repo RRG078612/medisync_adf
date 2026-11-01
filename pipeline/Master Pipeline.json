@@ -51,7 +51,20 @@
 			{
 				"name": "Silver_to_gold",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Azure_Sql_Source_to_silver",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "adls_csv_source_to_silver",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
