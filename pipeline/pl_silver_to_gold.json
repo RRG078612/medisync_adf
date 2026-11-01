@@ -34,8 +34,6 @@
 			{
 				"name": "ingest_tables",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "read_metadata_sql",
@@ -84,6 +82,8 @@
 						{
 							"name": "Updating Current status to Failed",
 							"type": "Script",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Silver to Gold",
@@ -140,24 +140,6 @@
 								"notebookPath": {
 									"value": "/medi_sync/medi-sync-adb/Gold/NB_@{item().gold_table_name}",
 									"type": "Expression"
-								},
-								"baseParameters": {
-									"landing_timestamp": {
-										"value": "@variables('start_time')",
-										"type": "Expression"
-									},
-									"source_system": {
-										"value": "@activity('read_table_metadata').output.firstRow.source_system",
-										"type": "Expression"
-									},
-									"table_name": {
-										"value": "@activity('read_table_metadata').output.firstRow.source_table_name",
-										"type": "Expression"
-									},
-									"source_file_format": {
-										"value": "@coalesce(activity('read_table_metadata').output.firstRow.source_file_format,'')",
-										"type": "Expression"
-									}
 								}
 							},
 							"linkedServiceName": {
@@ -168,6 +150,8 @@
 						{
 							"name": "Updating Current status to SUCCESS",
 							"type": "Script",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Silver to Gold",
